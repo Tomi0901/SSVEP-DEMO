@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Comunicación Cerebro-Computador - SSVEP</title>
+<title>SSVEP - Estímulos y Onda</title>
 <style>
     body {
         font-family: Arial, sans-serif;
-        background-color: #111;
-        color: white;
+        background-color: #07111f; /* azul noche */
+        color: #d0e4ff;
         margin: 0;
         padding: 0;
         text-align: center;
@@ -15,64 +15,53 @@
 
     h1 {
         margin-top: 30px;
-        font-size: 32px;
-        font-weight: 800;
+        font-size: 30px;
+        color: #9bc4ff;
     }
 
     .section-title {
-        margin-top: 50px;
-        font-size: 26px;
+        margin-top: 40px;
+        font-size: 24px;
         font-weight: 700;
-        text-decoration: underline;
+        color: #8ab8ff;
     }
 
     #stimulusBox {
-        width: 280px;
-        height: 280px;
-        margin: 20px auto;
-        border-radius: 10px;
+        width: 260px;
+        height: 260px;
+        margin: 25px auto;
         background-color: rgb(100,100,100);
+        border-radius: 10px;
+        border: 2px solid #1f3b66;
+        box-shadow: 0px 0px 15px #1c3a70;
     }
 
-    .button-group {
-        margin-top: 20px;
-    }
-
-    button {
-        background-color: #444;
-        border: 1px solid #888;
-        color: white;
+    .button-group button {
+        background-color: #0c1c33;
+        border: 1px solid #325a8e;
+        color: #d0e4ff;
         padding: 10px 20px;
-        margin: 4px;
+        margin: 6px;
         border-radius: 6px;
         cursor: pointer;
         font-size: 15px;
     }
 
-    button:hover {
-        background-color: #666;
+    .button-group button:hover {
+        background-color: #17325a;
     }
 
     canvas {
         margin-top: 30px;
-        background-color: #222;
-        border: 1px solid #555;
-    }
-
-    .info-box {
-        width: 80%;
-        margin: 20px auto;
-        background: #222;
-        padding: 20px;
-        border-radius: 10px;
-        border: 1px solid #555;
-        text-align: left;
+        background-color: #0a1526;
+        border: 1px solid #264c7a;
+        box-shadow: 0px 0px 10px #112544;
     }
 </style>
 </head>
 <body>
 
-<h1>Comunicación Cerebro-Computador en base a estímulos visuales</h1>
+<h1>Comunicación Cerebro-Computador SSVEP</h1>
 
 <!-- ===================== ESTÍMULO VISUAL ========================= -->
 
@@ -87,43 +76,17 @@
     <button onclick="setFrequency(20)">20 Hz</button>
 </div>
 
-<!-- ===================== FUNCIÓN SINUSOIDAL ========================= -->
+<!-- ===================== ONDA ANIMADA ========================= -->
 
-<div class="section-title">Modelación de la Función Sinusoidal (Escala de Grises 0.318–0.613)</div>
+<div class="section-title">Función Sinusoidal Animada</div>
 
-<canvas id="waveCanvas" width="900" height="300"></canvas>
+<canvas id="waveCanvas" width="1000" height="220"></canvas>
 
 <div class="button-group">
-    <button onclick="setWave(10)">Función 10 Hz</button>
-    <button onclick="setWave(12)">Función 12 Hz</button>
-    <button onclick="setWave(15)">Función 15 Hz</button>
-    <button onclick="setWave(20)">Función 20 Hz</button>
-</div>
-
-<!-- ===================== ANÁLISIS DE LA FUNCIÓN ========================= -->
-
-<div class="section-title">Parámetros Matemáticos</div>
-
-<div class="info-box">
-    <p><b>Amplitud:</b> 0.149 (determina la variación dentro del rango de grises)</p>
-    <p><b>Período:</b> T = 1 / f</p>
-    <p><b>Desfase:</b> π/2 rad (la onda parte desde su punto máximo)</p>
-    <p><b>Monotonía:</b> Oscila de forma periódica entre los valores 0.318 y 0.613</p>
-</div>
-
-<!-- ===================== AUTORES ========================= -->
-
-<div class="section-title">Autores y Profesores Guía</div>
-
-<div class="info-box">
-    <p><b>Autores:</b><br>
-    Bravo, T. - t.bravod@udd.cl<br>
-    Burgos, V. - v.burgosb@udd.cl<br>
-    Yabrudy, E. - e.yabrudyr@udd.cl</p>
-
-    <p><b>Profesores guía:</b><br>
-    Gustavo Adolfo Castro P. - gustavo.castro@udd.cl<br>
-    René Ignacio Pino P. - rene.pino@udd.cl</p>
+    <button onclick="waveFreq = 10">Onda 10 Hz</button>
+    <button onclick="waveFreq = 12">Onda 12 Hz</button>
+    <button onclick="waveFreq = 15">Onda 15 Hz</button>
+    <button onclick="waveFreq = 20">Onda 20 Hz</button>
 </div>
 
 <!-- ===================== SCRIPT ========================= -->
@@ -144,7 +107,6 @@ function animateStimulus(timestamp) {
     let t = (timestamp - startTime) / 1000;
 
     let gray = 0.464 + 0.149 * Math.sin(2 * Math.PI * freq * t + Math.PI/2);
-
     gray = Math.max(0.318, Math.min(0.613, gray));
 
     let g255 = Math.round(gray * 255);
@@ -155,65 +117,41 @@ function animateStimulus(timestamp) {
 requestAnimationFrame(animateStimulus);
 
 
-/* ---------------- FUNCIÓN SINUSOIDAL ---------------- */
-
+/* ---------------- ONDA ANIMADA ---------------- */
 let canvas = document.getElementById("waveCanvas");
 let ctx = canvas.getContext("2d");
 let waveFreq = 10;
+let offset = 0;
 
-function setWave(f) {
-    waveFreq = f;
-    drawWave();
-}
+function animateWave() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
-function drawAxes() {
-    ctx.strokeStyle = "#888";
-    ctx.lineWidth = 1;
+    let W = canvas.width;
+    let H = canvas.height;
 
-    ctx.beginPath();
-    ctx.moveTo(50, 20);
-    ctx.lineTo(50, 280);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(50, 150);
-    ctx.lineTo(880, 150);
-    ctx.stroke();
-
-    ctx.fillStyle = "white";
-    ctx.fillText("0 s", 50, 295);
-    ctx.fillText("5 s", 840, 295);
-
-    ctx.fillText("0.318", 10, 260);
-    ctx.fillText("0.613", 10, 40);
-
-    ctx.fillText("Tiempo (s)", 430, 295);
-    ctx.fillText("Escala de grises", 10, 15);
-}
-
-function drawWave() {
-    ctx.clearRect(0,0,900,300);
-    drawAxes();
-
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle = "#8ab8ff";
     ctx.lineWidth = 2;
     ctx.beginPath();
 
-    for (let x = 0; x <= 830; x++) {
-        let t = (x / 830) * 5;
+    for (let x = 0; x < W; x++) {
+        let t = (x / W) * 5;
 
-        let yVal = 0.464 + 0.149 * Math.sin(2*Math.PI*waveFreq*t + Math.PI/2);
+        let yVal = 0.464 + 0.149 * Math.sin(2 * Math.PI * waveFreq * (t + offset) + Math.PI / 2);
 
-        let y = 150 - (yVal - 0.464) * (200 / 0.149);
+        let y = H/2 - (yVal - 0.464) * (140 / 0.149);
 
-        if (x === 0) ctx.moveTo(50 + x, y);
-        else ctx.lineTo(50 + x, y);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
     }
 
     ctx.stroke();
+
+    offset += 0.01;
+
+    requestAnimationFrame(animateWave);
 }
 
-drawWave();
+animateWave();
 </script>
 
 </body>
