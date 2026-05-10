@@ -2,156 +2,152 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>SSVEP - Estímulos y Onda</title>
+<title>SSVEP Visual Stimuli & Sinusoidal Models</title>
 <style>
     body {
-        font-family: Arial, sans-serif;
-        background-color: #07111f; /* azul noche */
-        color: #d0e4ff;
         margin: 0;
-        padding: 0;
-        text-align: center;
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: white;
+        overflow: hidden;
     }
-
-    h1 {
-        margin-top: 30px;
-        font-size: 30px;
-        color: #9bc4ff;
-    }
-
-    .section-title {
-        margin-top: 40px;
-        font-size: 24px;
-        font-weight: 700;
-        color: #8ab8ff;
-    }
-
-    #stimulusBox {
+    #menu {
+        position: fixed;
+        top: 0;
+        left: 0;
         width: 260px;
-        height: 260px;
-        margin: 25px auto;
-        background-color: rgb(100,100,100);
-        border-radius: 10px;
-        border: 2px solid #1f3b66;
-        box-shadow: 0px 0px 15px #1c3a70;
+        height: 100vh;
+        background: #000;
+        border-right: 2px solid #222;
+        padding: 20px;
+        overflow-y: auto;
     }
-
-    .button-group button {
-        background-color: #0c1c33;
-        border: 1px solid #325a8e;
-        color: #d0e4ff;
-        padding: 10px 20px;
-        margin: 6px;
-        border-radius: 6px;
+    #menu h2 {
+        margin-top: 0;
+    }
+    #menu button {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        background: #222;
+        color: white;
+        border: 1px solid #444;
         cursor: pointer;
+        border-radius: 6px;
         font-size: 15px;
     }
-
-    .button-group button:hover {
-        background-color: #17325a;
+    #menu button:hover {
+        background: #333;
     }
-
+    #view {
+        position: absolute;
+        left: 260px;
+        top: 0;
+        width: calc(100vw - 260px);
+        height: 100vh;
+        background: black;
+    }
     canvas {
-        margin-top: 30px;
-        background-color: #0a1526;
-        border: 1px solid #264c7a;
-        box-shadow: 0px 0px 10px #112544;
+        width: 100%;
+        height: 100%;
     }
 </style>
 </head>
 <body>
 
-<h1>Comunicación Cerebro-Computador SSVEP</h1>
+<div id="menu">
+    <h2>Estimulación SSVEP</h2>
 
-<!-- ===================== ESTÍMULO VISUAL ========================= -->
+    <h3>🔳 Estímulos Visuales</h3>
+    <button onclick="runStimulus(10)">Estímulo 10 Hz</button>
+    <button onclick="runStimulus(12)">Estímulo 12 Hz</button>
+    <button onclick="runStimulus(15)">Estímulo 15 Hz</button>
+    <button onclick="runStimulus(20)">Estímulo 20 Hz</button>
 
-<div class="section-title">Estímulo Visual Parpadeante</div>
-
-<div id="stimulusBox"></div>
-
-<div class="button-group">
-    <button onclick="setFrequency(10)">10 Hz</button>
-    <button onclick="setFrequency(12)">12 Hz</button>
-    <button onclick="setFrequency(15)">15 Hz</button>
-    <button onclick="setFrequency(20)">20 Hz</button>
+    <h3>📈 Funciones Sinusoidales</h3>
+    <button onclick="runWave(10)">Función 10 Hz</button>
+    <button onclick="runWave(12)">Función 12 Hz</button>
+    <button onclick="runWave(15)">Función 15 Hz</button>
+    <button onclick="runWave(20)">Función 20 Hz</button>
 </div>
 
-<!-- ===================== ONDA ANIMADA ========================= -->
-
-<div class="section-title">Función Sinusoidal Animada</div>
-
-<canvas id="waveCanvas" width="1000" height="220"></canvas>
-
-<div class="button-group">
-    <button onclick="waveFreq = 10">Onda 10 Hz</button>
-    <button onclick="waveFreq = 12">Onda 12 Hz</button>
-    <button onclick="waveFreq = 15">Onda 15 Hz</button>
-    <button onclick="waveFreq = 20">Onda 20 Hz</button>
+<div id="view">
+    <canvas id="canvas"></canvas>
 </div>
-
-<!-- ===================== SCRIPT ========================= -->
 
 <script>
-/* ---------------- ESTÍMULO VISUAL ---------------- */
-let box = document.getElementById("stimulusBox");
-let freq = 10;
-let startTime = null;
+// ---------------------- CANVAS SETUP ----------------------
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-function setFrequency(f) {
-    freq = f;
-    startTime = null;
+function resize(){
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
 }
+resize();
+window.onresize = resize;
 
-function animateStimulus(timestamp) {
-    if (!startTime) startTime = timestamp;
-    let t = (timestamp - startTime) / 1000;
+let animation = null;
 
-    let gray = 0.464 + 0.149 * Math.sin(2 * Math.PI * freq * t + Math.PI/2);
-    gray = Math.max(0.318, Math.min(0.613, gray));
+// ---------------------- ESTÍMULO VISUAL ----------------------
+function runStimulus(freq){
+    cancelAnimationFrame(animation);
 
-    let g255 = Math.round(gray * 255);
-    box.style.backgroundColor = `rgb(${g255},${g255},${g255})`;
+    let last = null;
+    let visible = false;
+    const interval = 1000 / (freq * 2); // parpadeo ON/OFF
 
-    requestAnimationFrame(animateStimulus);
-}
-requestAnimationFrame(animateStimulus);
+    function drawStimulus(ts){
+        if(!last) last = ts;
+        const diff = ts - last;
 
+        if(diff >= interval){
+            visible = !visible;
+            last = ts;
+        }
 
-/* ---------------- ONDA ANIMADA ---------------- */
-let canvas = document.getElementById("waveCanvas");
-let ctx = canvas.getContext("2d");
-let waveFreq = 10;
-let offset = 0;
+        ctx.fillStyle = visible ? "white" : "black";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
 
-function animateWave() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    let W = canvas.width;
-    let H = canvas.height;
-
-    ctx.strokeStyle = "#8ab8ff";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-
-    for (let x = 0; x < W; x++) {
-        let t = (x / W) * 5;
-
-        let yVal = 0.464 + 0.149 * Math.sin(2 * Math.PI * waveFreq * (t + offset) + Math.PI / 2);
-
-        let y = H/2 - (yVal - 0.464) * (140 / 0.149);
-
-        if (x === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        animation = requestAnimationFrame(drawStimulus);
     }
-
-    ctx.stroke();
-
-    offset += 0.01;
-
-    requestAnimationFrame(animateWave);
+    animation = requestAnimationFrame(drawStimulus);
 }
 
-animateWave();
+// ---------------------- FUNCIÓN SINUSOIDAL ----------------------
+function runWave(freq){
+    cancelAnimationFrame(animation);
+
+    const A = 0.149;
+    const offset = 0.464;
+    const fase = Math.PI/2;
+
+    let start = null;
+
+    function drawWave(ts){
+        if(!start) start = ts;
+        let t = (ts - start) / 1000;
+
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.beginPath();
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 3;
+
+        for(let x=0; x<canvas.width; x++){
+            const tt = t + x / canvas.width;
+            const y = A * Math.sin(2*Math.PI*freq*tt + fase) + offset;
+            const y_px = canvas.height - y * canvas.height;
+
+            if(x === 0) ctx.moveTo(x, y_px);
+            else ctx.lineTo(x, y_px);
+        }
+
+        ctx.stroke();
+        animation = requestAnimationFrame(drawWave);
+    }
+    animation = requestAnimationFrame(drawWave);
+}
+
 </script>
 
 </body>
