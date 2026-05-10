@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comunicación Cerebro-Computador en base a estímulos visuales</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #111;
+        color: white;
+        overflow: hidden;
+    }
+
+    /* ---------------------- ADVERTENCIA ---------------------- */
+    #warning-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.95);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 99999;
+    }
+
+    #warning-box {
+        background: #1a0000;
+        border: 4px solid #ff0000;
+        border-radius: 20px;
+        max-width: 700px;
+        width: 90%;
+        padding: 40px;
+        text-align: center;
+        color: white;
+        box-shadow: 0 0 30px rgba(255, 0, 0, 0.6);
+    }
+
+    #warning-box h1 {
+        color: #ff2b2b;
+        margin-top: 0;
+        margin-bottom: 25px;
+        font-size: 2.2rem;
+    }
+
+    #warning-box p {
+        font-size: 1.15rem;
+        line-height: 1.7;
+        margin: 15px 0;
+    }
+
+    #warning-box strong {
+        color: #ff4d4d;
+    }
+
+    #warning-box button {
+        margin-top: 25px;
+        background: #ff0000;
+        color: white;
+        border: none;
+        padding: 16px 36px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    #warning-box button:hover {
+        background: #cc0000;
+    }
+
+    /* ---------------------- MENÚ ---------------------- */
+    #menu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 320px;
+        height: 100vh;
+        background: #000;
+        border-right: 2px solid #222;
+        padding: 20px;
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+
+    #menu h1 {
+        font-size: 1.45rem;
+        line-height: 1.3;
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: #ffffff;
+        text-align: center;
+        border-bottom: 2px solid #333;
+        padding-bottom: 15px;
+    }
+
+    #menu h3 {
+        margin-top: 20px;
+        margin-bottom: 10px;
+        color: #ffffff;
+    }
+
+    #menu button {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        background: #222;
+        color: white;
+        border: 1px solid #444;
+        cursor: pointer;
+        border-radius: 6px;
+        font-size: 15px;
+    }
+
+    #menu button:hover {
+        background: #333;
+    }
+
+    /* ---------------------- AUTORES ---------------------- */
+    #credits {
+        margin-top: 25px;
+        padding-top: 15px;
+        border-top: 1px solid #333;
+        font-size: 11px;
+        line-height: 1.5;
+        color: #cccccc;
+        word-break: break-word;
+    }
+
+    #credits strong {
+        color: #ffffff;
+    }
+
+    /* ---------------------- VISUALIZACIÓN ---------------------- */
+    #view {
+        position: absolute;
+        left: 320px;
+        top: 0;
+        width: calc(100vw - 320px);
+        height: 100vh;
+        background: black;
+    }
+
+    canvas {
+        width: 100%;
+        height: 100%;
+    }
+</style>
+</head>
+<body>
+
+<!-- ADVERTENCIA INICIAL -->
+<div id="warning-overlay">
+    <div id="warning-box">
+        <h1>⚠️ ADVERTENCIA IMPORTANTE</h1>
+
+        <p>
+            Esta demostración contiene <strong>estímulos visuales parpadeantes</strong>
+            entre 10 y 20 Hz.
+        </p>
+
+        <p>
+            La exposición a luces intermitentes puede provocar molestias visuales,
+            dolor de cabeza y mareos.
+        </p>
+
+        <p>
+            Si tienes antecedentes de epilepsia fotosensible, migrañas o
+            sensibilidad a la luz, se recomienda no continuar.
+        </p>
+
+        <button onclick="closeWarning()">
+            Entiendo y Deseo Continuar
+        </button>
+    </div>
+</div>
+
+<!-- MENÚ -->
+<div id="menu">
+    <h1>
+        Comunicación Cerebro-Computador<br>
+        en base a estímulos visuales
+    </h1>
+
+    <h3>🔳 Estímulos Visuales</h3>
+    <button onclick="runStimulus(10)">Estímulo 10 Hz</button>
+    <button onclick="runStimulus(12)">Estímulo 12 Hz</button>
+    <button onclick="runStimulus(15)">Estímulo 15 Hz</button>
+    <button onclick="runStimulus(20)">Estímulo 20 Hz</button>
+
+    <h3>📈 Funciones Sinusoidales</h3>
+    <button onclick="runWave(10)">Función 10 Hz</button>
+    <button onclick="runWave(12)">Función 12 Hz</button>
+    <button onclick="runWave(15)">Función 15 Hz</button>
+    <button onclick="runWave(20)">Función 20 Hz</button>
+
+    <!-- AUTORES Y PROFESORES -->
+    <div id="credits">
+        <strong>Autores:</strong><br>
+        Bravo, T. – t.bravod@udd.cl<br>
+        Burgos, V. – v.burgosb@udd.cl<br>
+        Yabrudy, E. – e.yabrudyr@udd.cl
+
+        <br><br>
+
+        <strong>Profesores guía:</strong><br>
+        Gustavo Adolfo Castro P.<br>
+        gustavo.castro@udd.cl<br><br>
+
+        René Ignacio Pino P.<br>
+        rene.pino@udd.cl
+    </div>
+</div>
+
+<!-- CANVAS -->
+<div id="view">
+    <canvas id="canvas"></canvas>
+</div>
+
+<script>
+// ---------------------- ADVERTENCIA ----------------------
+function closeWarning() {
+    document.getElementById("warning-overlay").style.display = "none";
+}
+
+// ---------------------- CANVAS ----------------------
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+function resize() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+let animation = null;
+
+// ---------------------- ESTÍMULO VISUAL ----------------------
+function runStimulus(freq) {
+    cancelAnimationFrame(animation);
+
+    let last = null;
+    let visible = false;
+    const interval = 1000 / (freq * 2);
+
+    function drawStimulus(ts) {
+        if (!last) last = ts;
+        const diff = ts - last;
+
+        if (diff >= interval) {
+            visible = !visible;
+            last = ts;
+        }
+
+        ctx.fillStyle = visible ? "white" : "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        animation = requestAnimationFrame(drawStimulus);
+    }
+
+    animation = requestAnimationFrame(drawStimulus);
+}
+
+// ---------------------- FUNCIÓN SINUSOIDAL ----------------------
+function runWave(freq) {
+    cancelAnimationFrame(animation);
+
+    const A = 0.149;
+    const offset = 0.464;
+    const fase = Math.PI / 2;
+
+    let start = null;
+
+    function drawWave(ts) {
+        if (!start) start = ts;
+        const t = (ts - start) / 1000;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.beginPath();
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 3;
+
+        for (let x = 0; x < canvas.width; x++) {
+            const tt = t + x / canvas.width;
+            const y = A * Math.sin(2 * Math.PI * freq * tt + fase) + offset;
+            const y_px = canvas.height - y * canvas.height;
+
+            if (x === 0) ctx.moveTo(x, y_px);
+            else ctx.lineTo(x, y_px);
+        }
+
+        ctx.stroke();
+
+        animation = requestAnimationFrame(drawWave);
+    }
+
+    animation = requestAnimationFrame(drawWave);
+}
+</script>
+
+</body>
+</html>
